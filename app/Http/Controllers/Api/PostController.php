@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Api\Post\PostCommentRequest;
+use App\Http\Requests\Api\Post\PostLikeRequest;
 use App\Http\Requests\Api\Post\PostStoreRequest;
 use App\Models\Post;
 use App\Services\Api\PostService;
@@ -72,5 +74,21 @@ class PostController extends Controller
     public function destroy($id)
     {
         //
+    }
+
+    public function like(PostLikeRequest $request)
+    {
+        $input = $request->all();
+        $service = new PostService();
+        $liked = $service->isLikedPost($input);
+        return response()->json($liked);
+    }
+
+    public function comment(PostCommentRequest $request)
+    {
+        $input = $request->all();
+        $service = new PostService();
+        $post = $service->comment($input);
+        return response()->json($post);
     }
 }
