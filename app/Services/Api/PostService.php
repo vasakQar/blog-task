@@ -13,6 +13,7 @@ class PostService
 
         $userId = Auth::id();
         $tagId = isset($inputs['tag_id']) ? $inputs['tag_id'] : null;
+        $search = isset($inputs['search']) ? $inputs['search'] : null;
 
         $posts = Post::query()
             ->withCount(['likes'])
@@ -25,6 +26,11 @@ class PostService
                 $query->whereHas('tags', function($q) use ($tagId) {
                     $q->where('tags.id', $tagId);
                 });
+            })
+            ->when($search, function($query, $search) {
+                $query
+                    ->where('title', 'LIKE', "%{$search}%") 
+                    ->orWhere('content', 'LIKE', "%{$search}%");
             })
             ->with('tags')
             ->orderByDesc('created_at')

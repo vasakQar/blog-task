@@ -24,7 +24,8 @@ class PostIndexRequest extends FormRequest
     public function rules()
     {
         return [
-            'tag_id' => 'exists:tags,id'
+            'tag_id' => 'exists:tags,id',
+            'search' => 'string|min:3'
         ];
     }
 }
