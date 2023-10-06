@@ -30,8 +30,8 @@ Route::group(['middleware' => 'auth:sanctum', ], function() {
         Route::put('edit', [UserController::class, 'edit']);
         Route::delete('delete', [UserController::class, 'delete']);
     });
-    Route::group(['prefix' => 'posts'], function() {
-        Route::apiResource('/', PostController::class);
+    Route::apiResource('/posts', PostController::class);
+    Route::group(['prefix' => 'post'], function() {
         Route::post('/like', [PostController::class, 'like']);
         Route::post('/comment', [PostController::class, 'comment']);
     });

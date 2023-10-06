@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\Post\PostCommentRequest;
+use App\Http\Requests\Api\Post\PostIndexRequest;
 use App\Http\Requests\Api\Post\PostLikeRequest;
 use App\Http\Requests\Api\Post\PostStoreRequest;
 use App\Models\Post;
@@ -12,23 +13,14 @@ use Illuminate\Http\Request;
 
 class PostController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function index()
+    public function index(PostIndexRequest $request)
     {
-        // tags search
-        dd(4545454);
+        $inputs = $request->validated();
+        $service = new PostService();
+        $posts = $service->index($inputs);
+        return response()->json($posts);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
     public function store(PostStoreRequest $request)
     {
         $inputs = $request->validated();
@@ -37,15 +29,10 @@ class PostController extends Controller
         return response()->json($post);
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function show($id)
     {
-        $post = Post::query()
+        $post = Post::findOrFail($id);
+        $post = $post
             ->where('id', $id)
             ->withCount(['likes'])
             ->with('tags', 'comments')

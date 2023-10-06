@@ -7,6 +7,31 @@ use Illuminate\Support\Facades\Auth;
 
 class PostService
 {
+    public function index($inputs)
+    {
+        $count = request('count', 5);
+
+        $userId = Auth::id();
+        $tagId = isset($inputs['tag_id']) ? $inputs['tag_id'] : null;
+
+        $posts = Post::query()
+            ->withCount(['likes'])
+            ->selectRaw(
+                "posts.*,
+                (SELECT COUNT(*) FROM post_likes WHERE post_likes.post_id = posts.id AND post_likes.user_id = ?) > 0 AS liked",
+                [$userId]
+            )
+            ->when($tagId, function($query, $tagId) {
+                $query->whereHas('tags', function($q) use ($tagId) {
+                    $q->where('tags.id', $tagId);
+                });
+            })
+            ->with('tags')
+            ->orderByDesc('created_at')
+            ->paginate($count);
+        return $posts;
+    }
+
     public function store($inputs)
     {
         $user = Auth::user();
@@ -49,12 +74,13 @@ class PostService
         ]);
 
         $post = $post->query()
+            ->where('id', $post->id)
             ->withCount(['likes'])
             ->selectRaw(
                 "posts.*,
-                (SELECT COUNT(*) FROM post_likes WHERE post_likes.post_id = posts.id AND post_likes.user_id = ?) > 0 AS liked"
+                (SELECT COUNT(*) FROM post_likes WHERE post_likes.post_id = posts.id AND post_likes.user_id = ?) > 0 AS liked",
+                [$userId]
             )
-            ->addBinding($userId, 'select')
             ->with('tags', 'comments')
             ->first();
         return $post;
